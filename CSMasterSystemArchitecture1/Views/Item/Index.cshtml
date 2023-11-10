@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <a href="/Item/Add">Add new item</a>
+    <h1 class="display-4">Here are all items in the list:</h1><br />
+
+     <div id="item_table">
+     </div>   
+
+    <script>
+        function getItems() {
+            fetch("/Item/Get").then(data => {
+                return data.json();
+            }).then(items => {
+                items.forEach((item) => {
+                    document.getElementById('item_table').innerHTML += `<h4>Item name: ${item.name} | ${item.price} €</h4>
+                                    <button onclick = "deleteItem('${item.guid}')" >Remove</button>
+                                        <a href = "/Item/Edit/${item.guid}" > Edit </a><br />`;
+                });
+                
+                    console.log(items);
+                });
+        }
+
+        getItems();
+
+        function deleteItem(guid) {
+            fetch("/Item/Remove/" + guid).then(function (response) {
+                if (!response.ok) {
+                    return false;
+                }
+            }).then(function (myBlob) {
+                location.reload();
+            });
+            }
+        
+    </script>
+</div>
+

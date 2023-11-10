@@ -1,0 +1,124 @@
+﻿@model CSMasterSystemArchitecture1.Models.Item
+
+@{
+    ViewData["Title"] = "Create";
+    ViewData["ModificationType"] = Model?.Guid == null ? "Add" : "Edit";
+}
+
+<h1>View</h1>
+
+<h4>@ViewData["ModificationType"] Item</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form onsubmit="return false;" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span id="NameValid" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span id="DescriptionValid" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span id="PriceValid" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CountryOfOrigin" class="control-label"></label>
+                <input asp-for="CountryOfOrigin" class="form-control" />
+                <span id="CountryOfOriginValid" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" onclick="validate()" value="Create" class="btn btn-primary" />
+            </div>
+            <input type="hidden" asp-for="Guid" />
+            <input type="hidden" asp-for="CreatedAt" />
+        </form>
+    </div>
+</div>
+<script>
+    var Guid = document.getElementById("Guid").value;
+
+        function getItem() {
+            fetch(`/Item/Get/${Guid}`).then(data => {
+                    return data.json();
+                }).then(items => {
+                    document.getElementById('Name').value = items[0].name;
+            document.getElementById('Description').value = items[0].description;
+            document.getElementById('Price').value = items[0].price;
+            document.getElementById('CountryOfOrigin').value = items[0].countryOfOrigin;
+            document.getElementById('Guid').value = items[0].guid;
+                    console.log(items);
+            });
+        }
+
+        if (Guid != '') {
+            getItem();
+        }
+
+    function isNumeric(value) {
+        return /^-?\d+(\.\d+)?$/.test(value);
+    }
+
+    function validate() {
+        var Name = document.getElementById("Name").value;
+        var Description = document.getElementById("Description").value;
+        var Price = document.getElementById("Price").value;
+        var CountryOfOrigin = document.getElementById("CountryOfOrigin").value;
+        var Guid = document.getElementById("Guid").value;
+        Guid = Guid == '' ? null : Guid;
+
+        var form_valid = true;
+        if (Name == '') {
+            document.getElementById("NameValid").innerHTML="Name cannot be empty!";
+            var form_valid = false;
+        }
+        if (Description == '') {
+            document.getElementById("DescriptionValid").innerHTML = "Description cannot be empty!";
+            var form_valid = false;
+        }
+        if (Price == '') {
+            document.getElementById("PriceValid").innerHTML = "Price cannot be empty!";
+            var form_valid = false;
+        }
+        if (CountryOfOrigin == '') {
+            document.getElementById("CountryOfOriginValid").innerHTML = "CountryOfOrigin cannot be empty!";
+            var form_valid = false;
+        }
+        if (!isNumeric(Price)) {
+            document.getElementById("PriceValid").innerHTML = "Price can only be a number!";
+            var form_valid = false;
+        }
+
+        if (!form_valid)
+        {return;}
+
+        const formData = {name: Name, description: Description, price: Price, countryoforigin: CountryOfOrigin, guid: Guid};
+
+        fetch(`/Item/@ViewData["ModificationType"]`, {
+            method: 'POST',
+            body: JSON.stringify(formData),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(data => {
+                if (data.ok) {
+                    alert("Item successfully @ViewData["ModificationType"]ed!");
+                }
+                return data.json();
+            });
+    }
+</script>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
